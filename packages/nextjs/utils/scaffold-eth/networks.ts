@@ -1,5 +1,6 @@
 import { Network } from "@ethersproject/networks";
 import * as chains from "wagmi/chains";
+import { cantoTestnet } from "~~/services/web3/CantoTestnetChain";
 
 export type TChainAttributes = {
   // color | [lightThemeColor, darkThemeColor]
@@ -81,7 +82,11 @@ export const getBlockExplorerTxLink = (network: Network, txnHash: string) => {
  * Get the wagmi's Chain target network configured in the app.
  */
 export const getTargetNetwork = () => {
-  const network = process.env.NEXT_PUBLIC_NETWORK as keyof typeof chains;
+  const network = process.env.NEXT_PUBLIC_NETWORK as keyof typeof chains | "cantoTestnet";
+
+  if (network === "cantoTestnet") {
+    return cantoTestnet;
+  }
 
   if (!network || !chains[network]) {
     // If error defaults to hardhat local network
