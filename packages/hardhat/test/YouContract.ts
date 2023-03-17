@@ -1,28 +1,62 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
-import { YourContract } from "../typechain-types";
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
 
-describe("YourContract", function () {
-  // We define a fixture to reuse the same setup in every test.
+describe('MultiSigWallet', function () {
+  let multiSigWallet: any;
+  let csrNFTTokenId: number;
+  let turnstile: any;
+  let owner1: any, owner2: any, owner3: any, executor: any, approver1: any, approver2: any, approver3: any;
+  let erc20: any;
 
-  let yourContract: YourContract;
-  before(async () => {
-    const [owner] = await ethers.getSigners();
-    const yourContractFactory = await ethers.getContractFactory("YourContract");
-    yourContract = (await yourContractFactory.deploy(owner.address)) as YourContract;
-    await yourContract.deployed();
+  before(async function () {
+    // Deploy Turnstile contract
+    const Turnstile = await ethers.getContractFactory('Turnstile');
+    turnstile = await Turnstile.deploy();
+
+    // Deploy MultiSigWallet contract
+    const MultiSigWallet = await ethers.getContractFactory('MultiSigWallet');
+    multiSigWallet = await MultiSigWallet.deploy('MultiSigWallet', turnstile.address);
+
+    // Deploy ERC20 token contract
+    const ERC20 = await ethers.getContractFactory('ERC20Mock');
+    erc20 = await ERC20.deploy('Test Token', 'TST', 1000000);
+
+    // Get test accounts
+    [owner1, owner2, owner3, executor, approver1, approver2, approver3] = await ethers.getSigners();
+
+    // Register MultiSigWallet contract with Turnstile
+    csrNFTTokenId = await turnstile.register(multiSigWallet.address);
+
+    // Initialize MultiSigWallet contract with owners and signatures required
+    await multiSigWallet.init([owner1.address, owner2.address, owner3.address], 2);
+
+    // Allocate ERC20 tokens to MultiSigWallet contract
+    await erc20.transfer(multiSigWallet.address, 1000);
   });
 
-  describe("Deployment", function () {
-    it("Should have the right message on deploy", async function () {
-      expect(await yourContract.greeting()).to.equal("Building Unstoppable Apps!!!");
-    });
+  it('should distribute fees to the approvers and executor', async function () {
+    // Execute a transaction that requires approval from 2 owners
+    const value = 0;
+    const data = '0x';
+    const to = executor.address;
+    const nonce = await multiSigWallet.nonce();
+    const signatures = [
+      await owner1.signMessage(ethers.utils.arrayify(multiSigWallet.getTransactionHash(nonce, to, value, data))),
+      await owner2.signMessage(ethers.utils.arrayify(multiSigWallet.getTransactionHash(nonce, to, value, data))),
+      await approver1.signMessage(ethers.utils.arrayify(multiSigWallet.getTransactionHash(nonce, to, value, data))),
+      await approver2.signMessage(ethers.utils.arrayify(multiSigWallet.getTransactionHash(nonce, to, value, data))),
+    ];
+    const result = await multiSigWallet.executeTransaction(to, value, data, signatures);
 
-    it("Should allow setting a new message", async function () {
-      const newGreeting = "Learn scaffold-eth! :)";
+    // Check that the approvers and executor received the appropriate fees
+    const totalFee = await turnstile.balances(csrNFTTokenId);
+    const feePercentage = await multiSigWallet.feePercentage();
+    const feeFirstApprover = Math.floor((totalFee * feePercentage) / 100);
+    const feeExecutor = Math.floor((totalFee * feePercentage) / 100);
+    const remainingFee = totalFee - feeFirstApprover - feeExecutor;
+    const feePerApprover = Math.floor(remainingFee / (signatures.length - 2));
 
-      await yourContract.setGreeting(newGreeting);
-      expect(await yourContract.greeting()).to.equal(newGreeting);
-    });
-  });
-});
+    expect(await erc20.balanceOf(approver1.address)).to.equal(feeFirstApprover + feePerApprover);
+    expect(await erc20.balanceOf(approver2.address)).to.equal(feePerApprover);
+    expect(await erc20.balanceOf(approver3.address)).to.equal(0);
+    expect(await erc20.balanceOf(executor.address)).to
