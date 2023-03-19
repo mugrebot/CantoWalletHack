@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -10,7 +10,7 @@ interface Turnstile {
     function balances(uint256 _tokenId) external view returns (uint256);
 }
 
-contract MyContract is Ownable {
+abstract contract MyContract is Ownable {
     Turnstile turnstile = Turnstile(0xEcf044C5B4b867CFda001101c617eCd347095B44);
     uint256 private csrNFTTokenId;
         mapping (address => uint256) balancio;

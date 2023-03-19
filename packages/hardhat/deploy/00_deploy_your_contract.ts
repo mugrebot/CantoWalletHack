@@ -1,42 +1,94 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DeployFunction } from "hardhat-deploy/types";
+// deploy/00_deploy_your_contract.js
 
-/**
- * Deploys a contract named "YourContract" using the deployer account and
- * constructor arguments set to the deployer address
- *
- * @param hre HardhatRuntimeEnvironment object.
- */
-const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  /*
-    On localhost, the deployer account is the one that comes with Hardhat, which is already funded.
+// const sleep = (ms) =>
+//   new Promise((r) =>
+//     setTimeout(() => {
+//       console.log(`waited for ${(ms / 1000).toFixed(3)} seconds`);
+//       r();
+//     }, ms)
+//   );
 
-    When deploying to live networks (e.g `yarn deploy --network goerli`), the deployer account
-    should have sufficient balance to pay for the gas fees for contract creation.
+module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
+  const { deploy } = deployments;
+  const { deployer } = await getNamedAccounts();
+  const chainId = await getChainId();
 
-    You can generate a random account with `yarn generate` which will fill DEPLOYER_PRIVATE_KEY
-    with a random private key in the .env file (then used on hardhat.config.ts)
-    You can run the `yarn account` command to check your balance in every network.
-  */
-  const { deployer } = await hre.getNamedAccounts();
-  const { deploy } = hre.deployments;
+  console.log("chainId: ", chainId);
 
-  await deploy("YourContract", {
+  const MultiSigFactoryDeployed = await deploy("MultiSigFactory", {
     from: deployer,
-    // Contract constructor arguments
-    args: [deployer],
     log: true,
-    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
-    // automatically mining the contract deployment transaction. There is no effect on live networks.
-    autoMine: true,
+    // waitConfirmations: 5,
   });
 
-  // Get the deployed contract
-  // const yourContract = await hre.ethers.getContract("YourContract", deployer);
+  // const MultiSigWalletDeployed = await deploy("MultiSigWallet", {
+  //   from: deployer,
+  //   args: [
+  //     // chainId,
+  //     // ["0x813f45BD0B48a334A3cc06bCEf1c44AAd907b8c1"],
+  //     // 1,
+  //     "default_name",
+  //     MultiSigFactoryDeployed.address,
+  //   ],
+  //   log: true,
+  // });
+
+  // console.log(
+  //   "MultiSig wallet deployed at => ",
+  //   MultiSigWalletDeployed.address
+  // );
+
+  console.log("MultiSig factory deployed at =>", MultiSigFactoryDeployed.address);
+
+  // Getting a previously deployed contract
+  // const multiSigFactory = await ethers.getContract("MultiSigFactory", deployer);
+  /*  await YourContract.setPurpose("Hello");
+  
+    To take ownership of yourContract using the ownable library uncomment next line and add the 
+    address you want to be the owner. 
+    // await yourContract.transferOwnership(YOUR_ADDRESS_HERE);
+
+    //const yourContract = await ethers.getContractAt('YourContract', "0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A") //<-- if you want to instantiate a version of a contract at a specific address!
+  */
+
+  /*
+  //If you want to send value to an address from the deployer
+  const deployerWallet = ethers.provider.getSigner()
+  await deployerWallet.sendTransaction({
+    to: "0x34aA3F359A9D614239015126635CE7732c18fDF3",
+    value: ethers.utils.parseEther("0.001")
+  })
+  */
+
+  /*
+  //If you want to send some ETH to a contract on deploy (make your constructor payable!)
+  const yourContract = await deploy("YourContract", [], {
+  value: ethers.utils.parseEther("0.05")
+  });
+  */
+
+  /*
+  //If you want to link a library into your contract:
+  // reference: https://github.com/austintgriffith/scaffold-eth/blob/using-libraries-example/packages/hardhat/scripts/deploy.js#L19
+  const yourContract = await deploy("YourContract", [], {}, {
+   LibraryName: **LibraryAddress**
+  });
+  */
+
+  // Verify from the command line by running `yarn verify`
+
+  // You can also Verify your contracts with Etherscan here...
+  // You don't want to verify on localhost
+  // try {
+  //   if (chainId !== localChainId) {
+  //     await run("verify:verify", {
+  //       address: YourContract.address,
+  //       contract: "contracts/YourContract.sol:YourContract",
+  //       contractArguments: [],
+  //     });
+  //   }
+  // } catch (error) {
+  //   console.error(error);
+  // }
 };
-
-export default deployYourContract;
-
-// Tags are useful if you have multiple deploy files and only want to run one of them.
-// e.g. yarn deploy --tags YourContract
-deployYourContract.tags = ["YourContract"];
+module.exports.tags = ["MultiSigFactory", "MultiSigWallet"];
