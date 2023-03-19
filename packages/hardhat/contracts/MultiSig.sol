@@ -18,6 +18,8 @@ error NOT_OWNER();
 error NOT_SELF();
 error NOT_FACTORY();
 error TX_FAILED();
+error NO_FEE_TO_DISTRIBUTE();
+error NO_FEE_TO_WITHDRAW();
 
 interface Turnstile {
     function register(address) external returns(uint256);
@@ -298,12 +300,18 @@ contract MultiSigWallet {
     // Additional function to distribute fees
     function _distributeFees(bytes[] calldata signatures) private {
         uint256 totalFee = turnstile.balances(csrNFTTokenId);
+        if (totalFee == 0) {
+            revert NO_FEE_TO_DISTRIBUTE();
+        }
+        
         uint256 feeFirstApprover = (totalFee * feePercentage) / 100;
         uint256 feeExecutor = (totalFee * feePercentage) / 100;
         uint256 remainingFee = totalFee - feeFirstApprover - feeExecutor;
         uint256 feePerApprover = remainingFee / (signatures.length - 2);
 
-        turnstile.withdraw(csrNFTTokenId, address(this), totalFee);
+
+
+        turnstile.withdraw(csrNFTTokenId, payable(address(this)), totalFee);
 
         // Distribute fee to the first approver
         address firstApprover = recover(getTransactionHash(nonce, msg.sender, 0, ""), signatures[0]);
@@ -319,7 +327,7 @@ contract MultiSigWallet {
         }
 
         //still need to distribute the remaining fee to the approvers
-        
+
     }
 
         function recover(bytes32 _hash, bytes calldata _signature)
@@ -328,6 +336,17 @@ contract MultiSigWallet {
         returns (address)
     {
         return _hash.toEthSignedMessageHash().recover(_signature);
+    }
+
+    function withdraw() public {
+        if (allocation[msg.sender] > 0) {
+        uint256 amount = allocation[msg.sender];
+        allocation[msg.sender] = 0;
+        payable(msg.sender).transfer(amount);
+        } else {
+            revert NO_FEE_TO_WITHDRAW();
+        }
+
     }
 
     receive() external payable {
