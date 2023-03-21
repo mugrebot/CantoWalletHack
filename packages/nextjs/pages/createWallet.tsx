@@ -53,7 +53,7 @@ const CreateWallet: NextPage = () => {
         <meta name="description" content="Created with 🏗 scaffold-eth" />
       </Head>
       <div className="flex items-center justify-center px-8">
-        <div className="bg-base-100 p-5 rounded-3xl lg:min-w-[25%] shadow-2xl mt-24">
+        <div className="bg-base-100 p-5 rounded-3xl lg:min-w-[25%] shadow-2xl mt-12">
           <h1 className="text-2xl font-semibold text-center mb-4">Create Your Wallet</h1>
           <form onSubmit={submit} className="flex flex-col space-y-5">
             {formFields.map((form, index) => {
