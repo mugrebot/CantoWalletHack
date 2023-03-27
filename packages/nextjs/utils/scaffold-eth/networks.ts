@@ -73,6 +73,14 @@ export const getBlockExplorerTxLink = (network: Network, txnHash: string) => {
     blockExplorerBaseTxUrl = "https://blockscout.com/poa/xdai/tx/";
   }
 
+  if (chainId === 7701) {
+    blockExplorerBaseTxUrl = "https://testnet.tuber.build/tx/";
+  }
+
+  if (chainId === 7700) {
+    blockExplorerBaseTxUrl = "https://evm.explorer.canto.io/tx/";
+  }
+
   const blockExplorerTxURL = blockExplorerBaseTxUrl + txnHash;
 
   return blockExplorerTxURL;

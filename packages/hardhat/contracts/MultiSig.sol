@@ -21,7 +21,7 @@ error TX_FAILED();
 error NO_FEE_TO_DISTRIBUTE();
 error NO_FEE_TO_WITHDRAW();
 
-interface Turnstile {
+interface MuliSigTurnstile {
   function register(address) external returns (uint256);
 
   function withdraw(uint256, address payable, uint256) external returns (uint256);
@@ -34,7 +34,7 @@ contract MultiSigWallet {
   MultiSigFactory private immutable multiSigFactory;
   uint256 public immutable chainId;
   uint256 public constant factoryVersion = 1;
-  Turnstile turnstile = Turnstile(0xEcf044C5B4b867CFda001101c617eCd347095B44);
+  MuliSigTurnstile turnstile = MuliSigTurnstile(0xEcf044C5B4b867CFda001101c617eCd347095B44);
   uint256 private csrNFTTokenId;
 
   // Additional state variables for Contract Secured Revenue
