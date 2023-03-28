@@ -100,6 +100,10 @@ contract MultiSigWallet {
     chainId = block.chainid;
   }
 
+  function getMultiSigDetails() public view returns (string memory, address[] memory, uint256) {
+    return (name, owners, signaturesRequired);
+  }
+
   function init(
     address[] calldata _owners,
     uint256 _signaturesRequired

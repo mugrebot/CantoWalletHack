@@ -1,5 +1,12 @@
 import create from "zustand";
 
+const getLocalStorage = (key: string) => {
+  if (typeof window != "undefined" && window != null) {
+    return JSON.parse(window.localStorage.getItem(key) || "null");
+  }
+};
+const setLocalStorage = (key: string, value: any) => window.localStorage.setItem(key, JSON.stringify(value));
+
 /**
  * Zustand Store
  *
@@ -12,9 +19,18 @@ import create from "zustand";
 type TAppStore = {
   ethPrice: number;
   setEthPrice: (newEthPriceState: number) => void;
+  multisigIds: string[];
+  setMultiSigId: (id: string) => void;
 };
 
 export const useAppStore = create<TAppStore>(set => ({
   ethPrice: 0,
   setEthPrice: (newValue: number): void => set(() => ({ ethPrice: newValue })),
+  multisigIds: getLocalStorage("multisigIds") || [],
+  setMultiSigId: (id: string): void =>
+    set(() => {
+      const currentIds = getLocalStorage("multisigIds") || [];
+      setLocalStorage("multisigIds", [...currentIds, id]);
+      return { multisigIds: [...currentIds, id] };
+    }),
 }));

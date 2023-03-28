@@ -1,8 +1,13 @@
 import { FormEvent, useState } from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { BigNumber } from "ethers";
 import type { NextPage } from "next";
 import { AddressInput, UNSIGNED_NUMBER_REGEX } from "~~/components/scaffold-eth";
-import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractWrite, useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
+import { useAppStore } from "~~/services/store/store";
+
+const NUMBER_REGEX = /^[0-9]+(\.[0-9]+)?$/;
 
 const CreateWallet: NextPage = () => {
   const [formFields, setFormFields] = useState([{ address: "" }]);
@@ -10,12 +15,22 @@ const CreateWallet: NextPage = () => {
   const [walletName, setWalletName] = useState("");
   const [walletBalance, setWalletBalance] = useState("");
 
-  // TODO : Check why its not working ? Maybe something wrong with contract?
-  const { writeAsync, isLoading } = useScaffoldContractWrite("MultiSigFactory", "create2", [
-    formFields.map(field => field.address),
-    minSignatures,
-    walletName,
-  ]);
+  const router = useRouter();
+
+  const createMultiSigId = useAppStore(state => state.setMultiSigId);
+
+  useScaffoldEventSubscriber("MultiSigFactory", "Create2Event", (contractId, ...rest) => {
+    console.log("⚡️ ~ file: createWallet.tsx:21 ~ contractId, ...rest", contractId, ...rest);
+    createMultiSigId((contractId as BigNumber).toString());
+    router.push("/");
+  });
+
+  const { writeAsync, isLoading } = useScaffoldContractWrite(
+    "MultiSigFactory",
+    "create2",
+    [formFields.map(field => field.address), minSignatures, walletName],
+    NUMBER_REGEX.test(walletBalance) ? walletBalance : "0",
+  );
 
   const handleFormChange = (addressValue: string, index: number) => {
     const data = [...formFields];
