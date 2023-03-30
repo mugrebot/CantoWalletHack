@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { TransactionListItem } from "../components/MultiSig/TransactionListItem";
 import { TenderlySimulation } from "../components/TenderlySimulation";
+import { useScaffoldEventSubscriber } from "../hooks/scaffold-eth";
 import { parseEther } from "@ethersproject/units";
 import { Button, Checkbox, List, Spin } from "antd";
-import { useScaffoldEventSubscriber } from "../hooks/scaffold-eth";
 import { ethers } from "ethers";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 

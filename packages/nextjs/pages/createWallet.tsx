@@ -1,11 +1,14 @@
+// @ts-nocheck
 import { FormEvent, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import axios from "axios";
 import { BigNumber } from "ethers";
 import type { NextPage } from "next";
 import { AddressInput, UNSIGNED_NUMBER_REGEX } from "~~/components/scaffold-eth";
 import { useScaffoldContractWrite, useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
 import { useAppStore } from "~~/services/store/store";
+import { SERVER_URL } from "~~/utils/constants";
 
 const NUMBER_REGEX = /^[0-9]+(\.[0-9]+)?$/;
 
@@ -19,11 +22,20 @@ const CreateWallet: NextPage = () => {
 
   const createMultiSigId = useAppStore(state => state.setMultiSigId);
 
-  useScaffoldEventSubscriber("MultiSigFactory", "Create2Event", (contractId, ...rest) => {
-    console.log("⚡️ ~ file: createWallet.tsx:21 ~ contractId, ...rest", contractId, ...rest);
-    createMultiSigId((contractId as BigNumber).toString());
-    router.push("/");
-  });
+  useScaffoldEventSubscriber(
+    "MultiSigFactory",
+    "Create2Event",
+    async (contractId, name, contractAddress, creator, owners, signaturesRequired) => {
+      console.log("⚡️ ~ file: createWallet.tsx:21 ~ contractId, ...rest", contractId);
+      const res = await axios.post(`${SERVER_URL}/` + `createWallet/${creator}/${name}/${contractAddress}/${7701}`, {
+        owners: owners,
+        signaturesRequired: signaturesRequired.toString(),
+      });
+      console.log("⚡️ ~ file: createWallet.tsx:34 ~ useScaffoldEventSubscriber ~ res:", res);
+      createMultiSigId((contractId as BigNumber).toString());
+      router.push("/");
+    },
+  );
 
   const { writeAsync, isLoading } = useScaffoldContractWrite(
     "MultiSigFactory",
