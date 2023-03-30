@@ -15,7 +15,7 @@
     "deploy": "yarn workspace @se-2/hardhat deploy",
     "verify": "yarn workspace @se-2/hardhat verify",
     "hardhat:compile": "yarn workspace @se-2/hardhat compile",
-    "hardhat:clean" : "yarn workspace @se-2/hardhat clean",
+    "hardhat:clean": "yarn workspace @se-2/hardhat clean",
     "generate": "yarn workspace @se-2/hardhat generate",
     "hardhat:lint": "yarn workspace @se-2/hardhat lint",
     "hardhat:lint-staged": "yarn workspace @se-2/hardhat lint-staged",
@@ -28,11 +28,23 @@
     "precommit": "lint-staged",
     "vercel": "yarn workspace @se-2/nextjs vercel",
     "vercel:yolo": "yarn workspace @se-2/nextjs vercel:yolo",
-    "wagmi": "yarn workspace @se-2/hardhat wagmi"
+    "wagmi": "yarn workspace @se-2/hardhat wagmi",
+    "backend": "cd packages/backend && node index"
   },
   "packageManager": "yarn@3.2.3",
   "devDependencies": {
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3"
+  },
+  "dependencies": {
+    "antd": "^5.3.3",
+    "cors": "^2.8.5",
+    "eth-hooks": "^4.6.2",
+    "ethereumjs-abi": "^0.6.8",
+    "express": "^4.18.2",
+    "i": "^0.3.7",
+    "npm": "^9.6.2",
+    "react-css-theme-switcher": "^0.3.0",
+    "react-router-dom": "^6.9.0"
   }
 }
