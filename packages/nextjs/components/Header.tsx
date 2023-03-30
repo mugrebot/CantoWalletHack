@@ -51,6 +51,12 @@ export const Header = () => {
           Create Wallet
         </NavLink>
       </li>
+      <li>
+        <NavLink href="/proposeTxn">
+          <WalletIcon className="h-4 w-4" />
+          Propose Transaction
+        </NavLink>
+      </li>
     </>
   );
 

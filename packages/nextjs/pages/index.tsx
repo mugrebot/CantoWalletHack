@@ -64,7 +64,7 @@ const Home: NextPage = () => {
                   <p className="my-0 text-xl font-bold text-primary">Balance</p>
                   <Balance address={data?.multiSigAddress} className="text-xl" />
                 </div>
-                <QRCodeSVG value="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" />
+                <QRCodeSVG value={data?.multiSigAddress} />
                 <div className="flex space-x-2">
                   <p className="my-0 text-xl font-bold text-primary">Wallet Name : </p>
                   <p className="my-0 font-semibold text-lg">{walletDetails && walletDetails[0]}</p>
